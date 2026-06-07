@@ -174,3 +174,79 @@ src/main/java
 * TDD 开发流程
 
 作为项目整体设计基础。
+
+# Prompt 2 - Base Rate Policy 开发
+## 时间
+
+2026-06-07
+
+## 背景
+
+开始实现第一条业务规则：
+
+根据被叫号码国家码确定基础费率。
+
+规则：
+
+- +86 -> 0.10
+- +1 -> 0.05
+- Other -> 0.50
+
+---
+
+## 我的问题
+
+如何以 TDD 方式实现 Base Rate Policy？
+
+要求：
+
+- 使用 JUnit5
+- 遵循 XP Red-Green-Refactor
+- 保持领域逻辑纯净
+
+---
+
+## AI 建议
+
+先编写测试：
+
+- should_return_china_rate
+- should_return_usa_rate
+- should_return_default_rate
+
+然后实现：
+
+- BaseRatePolicy
+- DefaultBaseRatePolicy
+
+通过号码前缀匹配国家。
+
+---
+
+## 我的决策
+
+采用测试优先开发。
+
+实现步骤：
+
+1. 编写 China Test
+2. 实现最小代码通过测试
+3. 补充 USA Test
+4. 补充 Default Test
+5. 全部测试通过
+
+---
+
+## 测试结果
+
+Tests run: 3
+Failures: 0
+Errors: 0
+
+---
+
+## 开发反思
+
+AI 曾建议直接完成全部业务逻辑。
+
+为了体现 XP，我选择按单个业务规则逐步实现，并在每个阶段形成独立 Git Commit。
