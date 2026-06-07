@@ -481,6 +481,160 @@ assertEquals(0, result.compareTo(new BigDecimal("0.90")));
 
 
 
+# 📄 Prompt 5 - NightDiscountPolicy 夜间费率规则实现
 
+## 🕒 时间
+
+2026-06-07
+
+---
+
+## 🧩 问题背景
+
+在 VoIP 计费系统中，需要实现夜间优惠规则：
+
+* 时间范围：23:00 ~ 05:00（跨天）
+* 夜间通话每分钟减免 0.02
+* 最低费用不能低于 0
+
+该规则需要作为独立 Policy 参与费率计算链路。
+
+---
+
+## ❓ 我的问题
+
+如何在 DDD 设计中实现夜间费率规则？
+
+要求：
+
+* 支持跨天时间判断（23:00 → 05:00）
+* 避免复杂 if-else 嵌套
+* 保持 Policy 纯函数设计
+* 可单元测试验证边界条件
+
+---
+
+## 🧠 AI 设计建议
+
+AI 建议采用 Policy 模式实现时间规则：
+
+```text id="kq3m9d"
+NightDiscountPolicy
+↓
+输入：rate + CallContext
+↓
+输出：调整后的 rate
+```
+
+关键点：
+
+* 使用 LocalTime 判断时间段
+* 拆分跨天逻辑为两个区间：
+
+  * 23:00 ~ 24:00
+  * 00:00 ~ 05:00
+* 单独封装 isNight() 方法
+
+---
+
+## 🏗 最终设计决策
+
+采用如下实现方式：
+
+### 1️⃣ 常量定义
+
+```java id="8yq9lz"
+private static final BigDecimal NIGHT_DISCOUNT = new BigDecimal("0.02");
+private static final LocalTime START = LocalTime.of(23, 0);
+private static final LocalTime END = LocalTime.of(5, 0);
+```
+
+---
+
+### 2️⃣ 夜间判断逻辑
+
+```java id="9h3q5k"
+private boolean isNight(LocalTime time) {
+    return !time.isBefore(START) || time.isBefore(END);
+}
+```
+
+---
+
+### 3️⃣ 核心实现逻辑
+
+```java id="1q8w0m"
+if (isNight(time)) {
+    rate = rate.subtract(NIGHT_DISCOUNT);
+}
+
+if (rate.compareTo(BigDecimal.ZERO) < 0) {
+    return BigDecimal.ZERO;
+}
+```
+
+---
+
+## 🧠 设计思考
+
+### ✔ 为什么拆分 isNight？
+
+* 提升可读性
+* 避免时间逻辑散落
+* 便于后续扩展（如节假日时间段）
+
+---
+
+### ✔ 为什么不写 if-else 直接判断？
+
+避免：
+
+* 复杂条件嵌套
+* RateCalculator 膨胀
+* 时间规则侵入业务主流程
+
+---
+
+### ✔ 为什么必须 clamp 到 0？
+
+防止：
+
+* discount 叠加导致负费率
+* 计费异常数据
+
+---
+
+## 🧪 测试验证策略
+
+覆盖三类情况：
+
+* 夜间（23:00 后）
+* 夜间（05:00 前）
+* 白天（正常费率）
+
+并使用：
+
+```java id="4x9q2k"
+assertEquals(0, result.compareTo(expected));
+```
+
+避免 BigDecimal scale 问题
+
+---
+
+## 🎯 结果
+
+* 夜间规则成功领域化
+* 时间逻辑独立封装
+* Policy 体系进一步完善
+* 为 RateCalculator 编排打基础
+
+---
+
+## 📌 总结
+
+该实现标志着：
+
+> ✔ 从“简单折扣规则” → “时间维度业务规则建模”
 
 
