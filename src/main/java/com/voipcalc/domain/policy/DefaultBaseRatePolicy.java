@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 public class DefaultBaseRatePolicy implements BaseRatePolicy {
 
     @Override
-    public BigDecimal calculate(CallContext context) {
+    public BigDecimal getRate(CallContext context) {
 
         String callee = context.getCallee();
 

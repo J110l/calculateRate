@@ -25,7 +25,7 @@ class DefaultBaseRatePolicyTest {
                 new DefaultBaseRatePolicy();
 
         BigDecimal rate =
-                policy.calculate(context);
+                policy.getRate(context);
 
         assertEquals(
                 new BigDecimal("0.10"),
@@ -46,7 +46,7 @@ class DefaultBaseRatePolicyTest {
                 new DefaultBaseRatePolicy();
 
         BigDecimal rate =
-                policy.calculate(context);
+                policy.getRate(context);
 
         assertEquals(
                 new BigDecimal("0.05"),
@@ -67,7 +67,7 @@ class DefaultBaseRatePolicyTest {
                 new DefaultBaseRatePolicy();
 
         BigDecimal rate =
-                policy.calculate(context);
+                policy.getRate(context);
 
         assertEquals(
                 new BigDecimal("0.50"),

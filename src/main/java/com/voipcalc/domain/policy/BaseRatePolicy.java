@@ -6,6 +6,5 @@ import java.math.BigDecimal;
 
 public interface BaseRatePolicy {
 
-    BigDecimal calculate(CallContext context);
-
+    BigDecimal getRate(CallContext context);
 }

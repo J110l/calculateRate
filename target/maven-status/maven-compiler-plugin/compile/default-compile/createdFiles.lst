@@ -6,3 +6,4 @@ com/voipcalc/domain/policy/VipDiscountPolicy.class
 com/voipcalc/domain/model/CallContext.class
 com/voipcalc/domain/model/UserType.class
 com/voipcalc/domain/policy/DefaultBaseRatePolicy.class
+com/voipcalc/domain/service/RateCalculator.class

@@ -1,3 +1,4 @@
+com/voipcalc/domain/service/RateCalculatorTest.class
 com/voipcalc/domain/policy/DefaultBaseRatePolicyTest.class
-com/voipcalc/domain/policy/NightDiscountPolicyTest.class
 com/voipcalc/domain/policy/VipDiscountPolicyTest.class
+com/voipcalc/domain/policy/NightDiscountPolicyTest.class
