@@ -639,3 +639,167 @@ assertEquals(0, result.compareTo(expected));
 
 
 
+# Prompt 6 - RateCalculator 领域服务设计与实现
+
+## 时间
+2026-06-07
+
+---
+
+## 背景
+
+在完成基础费率（BaseRatePolicy）与折扣策略（DiscountPolicy）之后，需要构建核心领域服务：
+
+👉 RateCalculator（通话费用计算引擎）
+
+该模块负责将多个独立策略组合，形成最终计费结果。
+
+---
+
+## 核心目标
+
+设计并实现一个可扩展的计费引擎：
+
+- 支持基础费率计算（BaseRatePolicy）
+- 支持多个折扣策略叠加（DiscountPolicy chain）
+- 保持核心计算逻辑无状态（stateless）
+- 避免 if-else 业务膨胀
+- 支持未来规则扩展（无需修改核心逻辑）
+
+---
+
+## 领域建模理解
+
+RateCalculator 属于：
+
+👉 Domain Service（领域服务）
+
+职责：
+
+- 编排规则（orchestration）
+- 不包含具体业务规则实现
+- 只负责规则执行顺序
+
+---
+
+## 设计结构
+
+CallContext
+    ↓
+BaseRatePolicy（基础费率）
+    ↓
+DiscountPolicy Chain（折扣链）
+    ├── VipDiscountPolicy
+    ├── NightDiscountPolicy
+    └── future policies
+    ↓
+Final Rate
+
+---
+
+## 关键设计原则
+
+### 1. 开闭原则（OCP）
+新增折扣策略无需修改 RateCalculator
+
+### 2. 组合优于继承
+策略通过 List<DiscountPolicy> 注入
+
+### 3. 单一职责原则
+RateCalculator 只负责“计算流程编排”
+
+---
+
+## 代码设计
+
+### RateCalculator
+
+```java
+public class RateCalculator {
+
+    private final BaseRatePolicy baseRatePolicy;
+    private final List<DiscountPolicy> discountPolicies;
+
+    public RateCalculator(BaseRatePolicy baseRatePolicy,
+                          List<DiscountPolicy> discountPolicies) {
+        this.baseRatePolicy = baseRatePolicy;
+        this.discountPolicies = discountPolicies;
+    }
+
+    public BigDecimal calculate(CallContext context) {
+
+        BigDecimal rate = baseRatePolicy.getRate(context);
+
+        for (DiscountPolicy policy : discountPolicies) {
+            rate = policy.apply(rate, context);
+        }
+
+        return rate.max(BigDecimal.ZERO);
+    }
+}
+````
+
+---
+
+## 关键设计决策
+
+### 为什么不用 if-else？
+
+❌ if-else 会导致：
+
+* 规则耦合
+* 难以扩展
+* 违反 OCP
+
+✔ 改为 Policy Chain：
+
+* 每个规则独立类
+* 可插拔
+* 可测试
+
+---
+
+## 测试策略（TDD）
+
+验证：
+
+### 场景1
+
+* 中国 + VIP + 夜间
+* 预期：0.10 → 0.09 → 0.07
+
+### 场景2
+
+* 美国 + VIP + 白天
+* 预期：0.05 → 0.045
+
+---
+
+## 后续扩展方向
+
+未来可升级为：
+
+### 1. 自动注册 Policy（Spring / SPI）
+
+替代手动 List.of(...)
+
+### 2. Policy 排序机制
+
+@Order 或 Priority
+
+### 3. 规则引擎化
+
+* Drools / 自研规则引擎
+* 配置化计费规则
+
+---
+
+## 当前阶段定位
+
+✔ 已完成：
+
+* DDD 领域拆分
+* Policy 模式
+* 规则链执行
+
+
