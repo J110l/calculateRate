@@ -1,6 +1,7 @@
-com/voipcalc/domain/policy/DiscountPolicy.class
 com/voipcalc/domain/policy/BaseRatePolicy.class
+com/voipcalc/domain/model/Country.class
+com/voipcalc/domain/policy/DiscountPolicy.class
+com/voipcalc/domain/policy/VipDiscountPolicy.class
 com/voipcalc/domain/model/CallContext.class
 com/voipcalc/domain/model/UserType.class
 com/voipcalc/domain/policy/DefaultBaseRatePolicy.class
-com/voipcalc/domain/model/Country.class

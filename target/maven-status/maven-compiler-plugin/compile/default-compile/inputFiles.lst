@@ -4,3 +4,4 @@
 /Users/nanlin/Desktop/calculateRate/src/main/java/com/voipcalc/domain/policy/BaseRatePolicy.java
 /Users/nanlin/Desktop/calculateRate/src/main/java/com/voipcalc/domain/policy/DefaultBaseRatePolicy.java
 /Users/nanlin/Desktop/calculateRate/src/main/java/com/voipcalc/domain/policy/DiscountPolicy.java
+/Users/nanlin/Desktop/calculateRate/src/main/java/com/voipcalc/domain/policy/VipDiscountPolicy.java
