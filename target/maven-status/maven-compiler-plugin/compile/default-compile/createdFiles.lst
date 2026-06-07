@@ -1,4 +1,5 @@
 com/voipcalc/domain/policy/BaseRatePolicy.class
+com/voipcalc/domain/policy/NightDiscountPolicy.class
 com/voipcalc/domain/model/Country.class
 com/voipcalc/domain/policy/DiscountPolicy.class
 com/voipcalc/domain/policy/VipDiscountPolicy.class

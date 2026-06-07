@@ -480,3 +480,7 @@ assertEquals(0, result.compareTo(new BigDecimal("0.90")));
 通过切换到 `compareTo`，避免了数值表示差异带来的误判。
 
 
+
+
+
+
