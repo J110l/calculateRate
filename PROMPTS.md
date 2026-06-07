@@ -252,3 +252,231 @@ AI 曾建议直接完成全部业务逻辑。
 为了体现 XP，我选择按单个业务规则逐步实现，并在每个阶段形成独立 Git Commit。
 
 
+# Prompt3 - VipDiscountPolicy 实现（
+
+## 🕒 时间
+
+2026-06-07
+
+---
+
+## 🧩 问题背景
+
+在实现 VoIP 费率计算引擎过程中，需要设计用户折扣规则：
+
+* VIP 用户享受 9 折优惠
+* NORMAL 用户无折扣
+* 规则必须可扩展（DDD + Policy 模式）
+
+---
+
+## ❓ 我的问题
+
+如何在 DDD 架构中实现 VIP 用户折扣策略？
+
+要求：
+
+* 避免 if-else 膨胀
+* 保持领域逻辑纯净（Stateless）
+* 支持未来扩展（如 Blacklist / Tier / Campaign）
+* 可被 RateCalculator 编排调用
+
+---
+
+## 🧠 AI 设计建议
+
+AI 建议采用 **Policy Pattern（策略模式）**：
+
+```text
+DiscountPolicy（抽象接口）
+   ↓
+VipDiscountPolicy
+   ↓
+Future: PromoDiscountPolicy / TierDiscountPolicy
+```
+
+核心思想：
+
+> 每种折扣规则独立为一个 Policy，而不是集中在一个类中判断
+
+---
+
+## 🏗 最终设计决策
+
+采用如下结构：
+
+### 1️⃣ DiscountPolicy 接口
+
+```java id="5b7c0e"
+public interface DiscountPolicy {
+    BigDecimal apply(BigDecimal rate, CallContext context);
+}
+```
+
+---
+
+### 2️⃣ VipDiscountPolicy 实现
+
+```java id="9t2m7k"
+public class VipDiscountPolicy implements DiscountPolicy {
+
+    private static final BigDecimal VIP_RATE = new BigDecimal("0.9");
+
+    @Override
+    public BigDecimal apply(BigDecimal rate, CallContext context) {
+
+        if (context.getUserType() == UserType.VIP) {
+            return rate.multiply(VIP_RATE);
+        }
+
+        return rate;
+    }
+}
+```
+
+---
+
+## 🧠 设计思考
+
+### ✔ 为什么不直接写 if-else 在 Calculator？
+
+避免：
+
+* 规则集中爆炸
+* 违反单一职责原则
+* 后续无法扩展优惠体系
+
+---
+
+### ✔ 为什么用 Policy？
+
+Policy 模式带来的好处：
+
+* 规则解耦
+* 可插拔
+* 易测试
+* 易组合（未来可 pipeline）
+
+---
+
+## 🧪 测试验证思路
+
+测试覆盖两种情况：
+
+* VIP → 0.9 倍
+* NORMAL → 原价
+
+---
+
+## 🎯 结果
+
+* VIP 折扣规则成功领域化
+* DiscountPolicy 可扩展结构建立
+* 为后续 NightDiscountPolicy / RateCalculator 铺路
+
+---
+
+## 📌 总结
+
+该实现标志着：
+
+> 从“过程式 if 判断” → “DDD Policy 领域建模”
+
+
+
+# 📄 Prompt4 - TDD修复 BigDecimal 精度问题
+
+## 🕒 时间
+
+2026-06-07
+
+---
+
+## 🧩 问题现象
+
+在执行 `VipDiscountPolicyTest` 时出现测试失败：
+
+```
+expected: <0.90> but was: <0.900>
+```
+
+---
+
+## 🧠 AI分析
+
+问题根因是 `BigDecimal` 的 scale（精度）差异：
+
+* `0.90` 与 `0.900` 在数学意义上相等
+* 但 `JUnit assertEquals` 会同时比较 **数值 + scale**
+* 导致测试失败
+
+---
+
+## 🔍 修复方案（候选）
+
+### 方案1：stripTrailingZeros（推荐次选）
+
+```java
+result.stripTrailingZeros()
+```
+
+✔ 去除末尾 0
+✔ 统一精度
+✔ 但仍依赖 BigDecimal 表示形式
+
+---
+
+### 方案2：compareTo（推荐最终方案）
+
+```java
+assertEquals(0, result.compareTo(new BigDecimal("0.90")));
+```
+
+✔ 只比较数值
+✔ 忽略 scale
+✔ 更符合业务语义
+✔ 工业级标准写法
+
+---
+
+## 🎯 最终决策
+
+采用：
+
+> ✔ `compareTo` 方式进行断言
+
+原因：
+
+* 避免 BigDecimal 精度陷阱
+* 更符合领域建模语义（只关心“费率值”）
+* 提升测试鲁棒性
+
+---
+
+## 🛠 修改结果
+
+在 `VipDiscountPolicyTest` 中统一修改断言：
+
+```java
+assertEquals(0, result.compareTo(new BigDecimal("0.90")));
+```
+
+---
+
+## ✅ 结果
+
+* 测试通过
+* BigDecimal 精度问题解决
+* 测试语义更加清晰稳定
+
+---
+
+## 📌 总结
+
+该问题属于典型：
+
+> Java BigDecimal 精度（scale）导致的测试断言陷阱问题
+
+通过切换到 `compareTo`，避免了数值表示差异带来的误判。
+
+
